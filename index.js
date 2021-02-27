@@ -183,9 +183,14 @@ const cache = (duration) => {
     return (req, res, next) => {
       let key = '__express__' + req.originalUrl || req.url
       let cachedBody = mcache.get(key)
+    //   console.log(186,mcache.keys().slice(0))
+      let allItems = mcache.keys()
+      console.log(188,allItems.length)
       if (cachedBody) {
         res.send(cachedBody)
         return
+      } else if(mcache.memsize > 100){
+            mcache.keys().splice(0,50)
       } else {
         res.sendResponse = res.send
         res.send = (body) => {
