@@ -57,8 +57,8 @@ const imageUpload = (path, buffer) => {
     })
 }
 
-const getImageUrl = async(type, buffer) => {
-    // const buffer = getImgBuffer(base64Image)
+const getImageUrl = async(type, base64Image) => {
+    const buffer = getImgBuffer(base64Image)
     const currentTime = new Date().getTime()
     return imageUpload(`${type}/${currentTime}.jpeg`, buffer)
 }
@@ -123,10 +123,26 @@ const uploader = multer({
 //UPLOAD IMAGE
 app.post('/api/upload',  async(req, res) => {
     try {
-        let imageBuffer = req.files.image64.data
-        // const { image64 } = req.body
+        // let imageBuffer = req.files.image64.data
+        const { image64 } = req.body
 
-        let output = await getImageUrl('profileImages', imageBuffer)
+        let output = await getImageUrl('profileImages', image64)
+        res.json({output})
+        // if(req.files) {
+        //     let output = await getImageUrl('profileImages', req.files.doc.data)
+        // }
+
+    } catch(err) {
+        res.json(err)
+    }
+});
+
+app.post('/api/uploadSecond',  async(req, res) => {
+    try {
+        // let imageBuffer = req.files.image64.data
+        const { image64 } = req.body
+
+        let output = await getImageUrl('profileImages', image64)
         res.json({output})
         // if(req.files) {
         //     let output = await getImageUrl('profileImages', req.files.doc.data)
@@ -141,14 +157,16 @@ app.post('/api/upload',  async(req, res) => {
 app.post("/api/addProfile", (req, res) => {
 
     try {
-        const { name, age, skills } = req.body
+        const { name, age, skills, profileImage, otherImage } = req.body
         const uniqueId = String(new Date().getTime())
     
         let reference = firebaseApp.firestore().collection("userData").doc(uniqueId).set({
             name,
             age,
             skills : skills.split(","),
-            createdAt: uniqueId
+            createdAt: uniqueId,
+            profileImage,
+            otherImage
         })
     
         res.json({message:"successfully added", data: {name, age, skills}})
